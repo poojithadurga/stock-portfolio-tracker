@@ -1,0 +1,92 @@
+# --- Hardcoded stock prices (you can modify freely) ---
+STOCK_PRICES = {
+    "AAPL": 188.5,
+    "TSLA": 243.2,
+    "GOOG": 176.0,
+    "AMZN": 131.7,
+    "INFY": 1600.0
+}
+
+def get_user_portfolio():
+    """Collect stock symbols and quantities from user until they type 'done'."""
+    portfolio = {}
+    print("\nEnter your stock holdings. Type 'done' when finished.")
+    print("Available stocks:", ", ".join(STOCK_PRICES.keys()))
+    
+    while True:
+        symbol = input("\nStock symbol: ").strip().upper()
+        if symbol == "DONE":
+            break
+        if symbol not in STOCK_PRICES:
+            print("⚠️ Unknown symbol. Choose from:", ", ".join(STOCK_PRICES.keys()))
+            continue
+        try:
+            qty = int(input(f"Quantity of {symbol}: "))
+            if qty < 0:
+                print("Quantity cannot be negative!")
+                continue
+        except ValueError:
+            print("Enter a valid integer quantity.")
+            continue
+        
+        portfolio[symbol] = portfolio.get(symbol, 0) + qty
+    return portfolio
+
+
+def calculate_total_value(portfolio):
+    """Return a tuple (details_dict, total_value)."""
+    details = {}
+    total = 0.0
+    for sym, qty in portfolio.items():
+        price = STOCK_PRICES[sym]
+        value = price * qty
+        details[sym] = value
+        total += value
+    return details, total
+
+
+def display_summary(details, total):
+    """Print a neat summary table of portfolio."""
+    print("\n📊 Portfolio Summary:")
+    print("-" * 40)
+    print(f"{'Stock':<10}{'Value (₹)':>15}")
+    print("-" * 40)
+    for sym, val in details.items():
+        print(f"{sym:<10}{val:>15,.2f}")
+    print("-" * 40)
+    print(f"{'TOTAL':<10}{total:>15,.2f}\n")
+
+
+def save_to_file(details, total, filename="portfolio_summary.txt"):
+    """Write the summary to a text file."""
+    with open(filename, "w") as f:
+        f.write("Stock Portfolio Summary\n")
+        f.write("-" * 40 + "\n")
+        for sym, val in details.items():
+            f.write(f"{sym:<10}{val:>15,.2f}\n")
+        f.write("-" * 40 + "\n")
+        f.write(f"{'TOTAL':<10}{total:>15,.2f}\n")
+    print(f"✅ Saved summary to '{filename}'.")
+
+
+def main():
+    print("=== Simple Stock Portfolio Tracker ===")
+    portfolio = get_user_portfolio()
+
+    if not portfolio:
+        print("\nNo stocks entered. Exiting.")
+        return
+
+    details, total = calculate_total_value(portfolio)
+    display_summary(details, total)
+
+    # Optional file save
+    choice = input("Save results to a text file? (y/n): ").strip().lower()
+    if choice in ("y", "yes"):
+        save_to_file(details, total)
+
+    print("\nThanks for using the tracker!")
+
+
+if __name__ == "__main__":
+    main()
